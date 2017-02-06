@@ -23,7 +23,7 @@ echo $bbp_copy->blogs_dropdown( 'bbpress_copy_from' );
 
 ?>
 <div>
-	<ul>
+	<ul id="bbpc-functions">
 		<?php echo $bbp_copy->output_settings($bbp_copy->delete_actions());?>
 	</ul>
 </div>

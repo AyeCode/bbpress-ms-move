@@ -322,6 +322,23 @@ class Bbpress_Ms_Move_Copy {
 					'total'=> $bbpc_total,
 					'offset'=> $bbpc_offset
 				));
+			}elseif($bbpc_action=='delete_forum_term_relationships'){
+
+				$tax = 'topic-tag';
+
+				if(!$bbpc_total){
+					$bbpc_total = $this->total_term_relationships($bbpc_from,$tax);
+
+				}else{
+					$count = $this->remove_term_relationships($bbpc_from,$limit,$bbpc_offset,$tax );
+					$bbpc_offset = $bbpc_offset+$count;
+				}
+
+				echo json_encode(array(
+					'success'=>'1',
+					'total'=> $bbpc_total,
+					'offset'=> $bbpc_offset
+				));
 			}elseif($bbpc_action=='delete_forum_terms'){
 
 				$tax = 'topic-tag';
@@ -591,6 +608,59 @@ class Bbpress_Ms_Move_Copy {
 		}
 
 		return count($terms);
+	}
+
+	public function remove_term_relationships($bbpc_from,$limit=100,$offset=0,$tax){
+		global $wpdb;
+
+		switch_to_blog( $bbpc_from );
+
+		$terms = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT * FROM $wpdb->term_taxonomy tt 
+				INNER JOIN $wpdb->term_relationships tr 
+				ON tt.term_taxonomy_id = tr.term_taxonomy_id
+				WHERE tt.taxonomy = %s
+				LIMIT %d,%d",
+				$tax,
+				$offset,
+				$limit
+			)
+		);
+
+		restore_current_blog();
+
+		if(!empty($terms)){
+			foreach($terms as $term){
+				$this->remove_term_relationship($term,$bbpc_from,$tax);
+			}
+		}
+
+		return count($terms);
+	}
+
+	public function remove_term_relationship($term,$bbpc_from,$tax){
+
+		global $wpdb;
+
+		switch_to_blog( $bbpc_from );
+
+
+		$wpdb->delete(
+			$wpdb->term_relationships,
+			array(
+				'object_id' => $term->object_id,
+				'term_taxonomy_id' => $term->term_taxonomy_id,
+				'term_order' => $term->term_order,
+			),
+			array(
+				'%d',
+				'%d',
+				'%d'
+			)
+		);
+
+		restore_current_blog();
 	}
 
 	public function move_term_relationship($term,$bbpc_to,$tax){
@@ -1037,6 +1107,7 @@ class Bbpress_Ms_Move_Copy {
 			"bbpc_forum_structure" => 1,
 			"bbpc_forum_topics" => 1,
 			"bbpc_forum_replies" => 1,
+			"bbpc_forum_term_relationships" => 1,
 			"bbpc_forum_terms" => 1,
 			"bbpc_forum_user_subscriptions" => 1,
 		));
@@ -1046,7 +1117,7 @@ class Bbpress_Ms_Move_Copy {
 		$output = '';
 		foreach($settings as $setting => $set){
 			$checked = $set ? "checked='checked'" : '';
-			$output .= "<li>";
+			$output .= "<li data-function='".$setting."'>";
 			$output .= "<h2>".ucwords(str_replace(array('bbpc','_'),array('',' '),$setting)).":</h2>";
 			$output .= "<span id='".$setting."_progress'></span>";
 			$output .= '<input type="checkbox" id="'.$setting.'_set" value="1" '.$checked.' class="bbpc-checkbox" >';

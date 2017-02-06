@@ -35,7 +35,7 @@ echo $bbp_copy->blogs_dropdown( 'bbpress_copy_to' );
 ?>
 
 <div>
-	<ul>
+	<ul id="bbpc-functions">
 		<?php echo $bbp_copy->output_settings($bbp_copy->copy_actions());?>
 	</ul>
 </div>

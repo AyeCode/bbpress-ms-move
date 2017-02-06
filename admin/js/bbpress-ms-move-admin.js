@@ -43,8 +43,12 @@ var bbpc_run = false;
 			}
 
 			jQuery('.bbpc-checkbox').attr("disabled", true);
+
 			bbpc_run = true;
-			bbpc_forum_settings('copy');
+			//bbpc_forum_settings('copy');
+
+			var first_function = jQuery('#bbpc-functions').find( "li" ).first().data("function");
+			window[first_function]('copy');
 
 		});
 
@@ -55,7 +59,8 @@ var bbpc_run = false;
 				jQuery('.bbpc-checkbox').attr("disabled", true);
 				bbpc_run = true;
 
-				bbpc_forum_settings('delete');
+				var first_function = jQuery('#bbpc-functions').find( "li" ).first().data("function");
+				window[first_function]('delete');
 			}
 			else
 			{
@@ -65,399 +70,407 @@ var bbpc_run = false;
 
 	});
 
-	// bbPress Delete functions
-
-
-	// bbPress Copy functions
-
-	function bbpc_forum_settings($action){
-
-		var run = jQuery('#bbpc_settings_set').is(":checked");
-		if(!run){
-			return bbpc_forum_structure($action);
-		}
-
-		var siteFrom = jQuery('select[name=bbpress_copy_from]').val();
-		var siteTo = jQuery('select[name=bbpress_copy_to]').val();
-
-
-		var data = {
-			'action': 'bbpress_copy_ajax_handler',
-			'bbpc_action': $action+'_settings',
-			'bbpc_from': siteFrom,
-			'bbpc_to': siteTo
-		};
-
-		jQuery.post(ajaxurl, data, function(response) {
-			var obj = jQuery.parseJSON(response);
-			if(obj.error){alert(obj.error);}
-			else{
-				bbpc_progress('#bbpc_settings',100,100);
-				jQuery('#bbpc_settings').val(100);
-				bbpc_forum_structure($action);
-			}
-		});
-	}
-
-	function bbpc_forum_structure($action,$offset,$total){
-
-		var run = jQuery('#bbpc_forum_structure_set').is(":checked");
-		if(!run){
-			return bbpc_forum_topics($action);
-		}
-
-		var siteFrom = jQuery('select[name=bbpress_copy_from]').val();
-		var siteTo = jQuery('select[name=bbpress_copy_to]').val();
-
-		if(!$offset){$offset = 0;}
-
-		var data = {
-			'action': 'bbpress_copy_ajax_handler',
-			'bbpc_action': $action+'_forum_structure',
-			'bbpc_from': siteFrom,
-			'bbpc_to': siteTo,
-			'bbpc_offset': $offset,
-			'bbpc_total': $total
-		};
-
-		jQuery.post(ajaxurl, data, function(response) {
-			var obj = jQuery.parseJSON(response);
-			if(obj.error){alert(obj.error);}
-			else{
-
-				bbpc_progress('#bbpc_forum_structure',obj.offset,obj.total);
-				console.log(obj);
-				if(obj.offset < obj.total){
-					bbpc_forum_structure($action,obj.offset,obj.total);
-				}else{
-					bbpc_forum_topics($action);
-				}
-
-			}
-		});
-	}
-
-
-	function bbpc_forum_topics($action,$offset,$total){
-
-		var run = jQuery('#bbpc_forum_topics_set').is(":checked");
-		if(!run){
-			return bbpc_forum_replies($action);
-		}
-
-		var siteFrom = jQuery('select[name=bbpress_copy_from]').val();
-		var siteTo = jQuery('select[name=bbpress_copy_to]').val();
-
-		if(!$offset){$offset = 0;}
-
-		var data = {
-			'action': 'bbpress_copy_ajax_handler',
-			'bbpc_action': $action+'_forum_topics',
-			'bbpc_from': siteFrom,
-			'bbpc_to': siteTo,
-			'bbpc_offset': $offset,
-			'bbpc_total': $total
-		};
-
-		jQuery.post(ajaxurl, data, function(response) {
-			var obj = jQuery.parseJSON(response);
-			if(obj.error){alert(obj.error);}
-			else{
-
-				bbpc_progress('#bbpc_forum_topics',obj.offset,obj.total);
-
-				console.log(obj);
-				if(obj.offset < obj.total){
-					bbpc_forum_topics($action,obj.offset,obj.total);
-				}else{
-					bbpc_forum_replies($action);
-				}
-
-			}
-		});
-	}
-
-	function bbpc_forum_replies($action,$offset,$total){
-
-		var run = jQuery('#bbpc_forum_replies_set').is(":checked");
-		if(!run){
-			return bbpc_forum_terms($action);
-		}
-
-		var siteFrom = jQuery('select[name=bbpress_copy_from]').val();
-		var siteTo = jQuery('select[name=bbpress_copy_to]').val();
-
-		if(!$offset){$offset = 0;}
-
-		var data = {
-			'action': 'bbpress_copy_ajax_handler',
-			'bbpc_action': $action+'_forum_replies',
-			'bbpc_from': siteFrom,
-			'bbpc_to': siteTo,
-			'bbpc_offset': $offset,
-			'bbpc_total': $total
-		};
-
-		jQuery.post(ajaxurl, data, function(response) {
-			var obj = jQuery.parseJSON(response);
-			if(obj.error){alert(obj.error);}
-			else{
-
-				bbpc_progress('#bbpc_forum_replies',obj.offset,obj.total);
-
-				console.log(obj);
-				if(obj.offset < obj.total){
-					bbpc_forum_replies($action,obj.offset,obj.total);
-				}else{
-					bbpc_forum_terms($action);
-				}
-
-			}
-		});
-	}
-
-	function bbpc_forum_terms($action,$offset,$total){
-
-		var run = jQuery('#bbpc_forum_terms_set').is(":checked");
-		if(!run){
-			return bbpc_forum_term_relationships($action);
-		}
-
-		var siteFrom = jQuery('select[name=bbpress_copy_from]').val();
-		var siteTo = jQuery('select[name=bbpress_copy_to]').val();
-
-		if(!$offset){$offset = 0;}
-
-		var data = {
-			'action': 'bbpress_copy_ajax_handler',
-			'bbpc_action': $action+'_forum_terms',
-			'bbpc_from': siteFrom,
-			'bbpc_to': siteTo,
-			'bbpc_offset': $offset,
-			'bbpc_total': $total
-		};
-
-		jQuery.post(ajaxurl, data, function(response) {
-			var obj = jQuery.parseJSON(response);
-			if(obj.error){alert(obj.error);}
-			else{
-
-				bbpc_progress('#bbpc_forum_terms',obj.offset,obj.total);
-				console.log(obj);
-				if(obj.offset < obj.total){
-					bbpc_forum_terms($action,obj.offset,obj.total);
-				}else{
-					bbpc_forum_term_relationships($action);
-				}
-
-			}
-		});
-	}
-
-	function bbpc_forum_term_relationships($action,$offset,$total){
-
-		var run = jQuery('#bbpc_forum_term_relationships_set').is(":checked");
-		if(!run){
-			return bbpc_forum_user_subscriptions($action);
-		}
-
-		var siteFrom = jQuery('select[name=bbpress_copy_from]').val();
-		var siteTo = jQuery('select[name=bbpress_copy_to]').val();
-
-		if(!$offset){$offset = 0;}
-
-		var data = {
-			'action': 'bbpress_copy_ajax_handler',
-			'bbpc_action': $action+'_forum_term_relationships',
-			'bbpc_from': siteFrom,
-			'bbpc_to': siteTo,
-			'bbpc_offset': $offset,
-			'bbpc_total': $total
-		};
-
-		jQuery.post(ajaxurl, data, function(response) {
-			var obj = jQuery.parseJSON(response);
-			if(obj.error){alert(obj.error);}
-			else{
-
-				bbpc_progress('#bbpc_forum_term_relationships',obj.offset,obj.total);
-				console.log(obj);
-				if(obj.offset < obj.total){
-					bbpc_forum_term_relationships($action,obj.offset,obj.total);
-				}else{
-					bbpc_forum_user_subscriptions($action);
-				}
-
-			}
-		});
-	}
-
-	function bbpc_forum_user_subscriptions($action,$offset,$total){
-
-		var run = jQuery('#bbpc_forum_user_subscriptions_set').is(":checked");
-		if(!run){
-			return bbpc_forum_user_capabilities($action);
-		}
-
-		var siteFrom = jQuery('select[name=bbpress_copy_from]').val();
-		var siteTo = jQuery('select[name=bbpress_copy_to]').val();
-
-		if(!$offset){$offset = 0;}
-
-		var data = {
-			'action': 'bbpress_copy_ajax_handler',
-			'bbpc_action': $action+'_forum_user_subscriptions',
-			'bbpc_from': siteFrom,
-			'bbpc_to': siteTo,
-			'bbpc_offset': $offset,
-			'bbpc_total': $total
-		};
-
-		jQuery.post(ajaxurl, data, function(response) {
-			var obj = jQuery.parseJSON(response);
-			if(obj.error){alert(obj.error);}
-			else{
-
-				bbpc_progress('#bbpc_forum_user_subscriptions',obj.offset,obj.total);
-
-				console.log(obj);
-				if(obj.offset < obj.total){
-					bbpc_forum_user_subscriptions($action,obj.offset,obj.total);
-				}else{
-					bbpc_forum_user_capabilities($action);
-				}
-
-			}
-		});
-	}
-
-	function bbpc_forum_user_capabilities($action,$offset,$total){
-
-		var run = jQuery('#bbpc_forum_user_capabilities_set').is(":checked");
-		if(!run){
-			return bbpc_forum_user_levels($action);
-		}
-
-		var siteFrom = jQuery('select[name=bbpress_copy_from]').val();
-		var siteTo = jQuery('select[name=bbpress_copy_to]').val();
-
-		if(!$offset){$offset = 0;}
-
-		var data = {
-			'action': 'bbpress_copy_ajax_handler',
-			'bbpc_action': $action+'_forum_user_capabilities',
-			'bbpc_from': siteFrom,
-			'bbpc_to': siteTo,
-			'bbpc_offset': $offset,
-			'bbpc_total': $total
-		};
-
-		jQuery.post(ajaxurl, data, function(response) {
-			var obj = jQuery.parseJSON(response);
-			if(obj.error){alert(obj.error);}
-			else{
-
-				bbpc_progress('#bbpc_forum_user_capabilities',obj.offset,obj.total);
-
-				console.log(obj);
-				if(obj.offset < obj.total){
-					bbpc_forum_user_capabilities($action,obj.offset,obj.total);
-				}else{
-					bbpc_forum_user_levels($action);
-				}
-
-			}
-		});
-	}
-
-	function bbpc_forum_user_levels($action,$offset,$total){
-
-		var run = jQuery('#bbpc_forum_user_levels_set').is(":checked");
-		if(!run){
-			return bbpc_forum_user_attachments($action);
-		}
-
-		var siteFrom = jQuery('select[name=bbpress_copy_from]').val();
-		var siteTo = jQuery('select[name=bbpress_copy_to]').val();
-
-		if(!$offset){$offset = 0;}
-
-		var data = {
-			'action': 'bbpress_copy_ajax_handler',
-			'bbpc_action': $action+'_forum_user_levels',
-			'bbpc_from': siteFrom,
-			'bbpc_to': siteTo,
-			'bbpc_offset': $offset,
-			'bbpc_total': $total
-		};
-
-		jQuery.post(ajaxurl, data, function(response) {
-			var obj = jQuery.parseJSON(response);
-			if(obj.error){alert(obj.error);}
-			else{
-
-				bbpc_progress('#bbpc_forum_user_levels',obj.offset,obj.total);
-
-				console.log(obj);
-				if(obj.offset < obj.total){
-					bbpc_forum_user_levels($action,obj.offset,obj.total);
-				}else{
-					bbpc_forum_user_attachments($action);
-				}
-
-			}
-		});
-	}
-
-	function bbpc_forum_user_attachments($action,$offset,$total){
-
-		var run = jQuery('#bbpc_forum_attachments_set').is(":checked");
-		if(!run){
-			return alert('Done!');
-		}
-
-		var siteFrom = jQuery('select[name=bbpress_copy_from]').val();
-		var siteTo = jQuery('select[name=bbpress_copy_to]').val();
-
-		if(!$offset){$offset = 0;}
-
-		var data = {
-			'action': 'bbpress_copy_ajax_handler',
-			'bbpc_action': $action+'_forum_attachments',
-			'bbpc_from': siteFrom,
-			'bbpc_to': siteTo,
-			'bbpc_offset': $offset,
-			'bbpc_total': $total
-		};
-
-		jQuery.post(ajaxurl, data, function(response) {
-			var obj = jQuery.parseJSON(response);
-			if(obj.error){alert(obj.error);}
-			else{
-
-				bbpc_progress('#bbpc_forum_attachments',obj.offset,obj.total);
-				console.log(obj);
-				if(obj.offset < obj.total){
-					bbpc_forum_user_attachments($action,obj.offset,obj.total);
-				}else{
-					alert('Done!');
-				}
-
-			}
-		});
-	}
-
-	function bbpc_progress(id,done,total){
-		jQuery(id).attr('max',total);
-		jQuery(id).val(done);
-		if(done < total){
-			jQuery(id+'_progress').html(done+' / '+total);
-		}else{
-			jQuery(id+'_progress').html('Done!');
-		}
-	}
-
 
 
 })( jQuery );
 
+
+function bbpc_run_next($last,$action){
+	var next = jQuery("ul#bbpc-functions").find("[data-function='" + $last + "']").next();
+	console.log('###'+next.data("function"));
+	if(next.data("function")){
+		window[next.data("function")]($action);
+	}else{
+		alert('Fin');
+	}
+}
+
+
+// bbPress Copy functions
+
+function bbpc_settings($action){
+
+	var run = jQuery('#bbpc_settings_set').is(":checked");
+	if(!run){
+		return bbpc_run_next('bbpc_settings',$action);
+	}
+
+	var siteFrom = jQuery('select[name=bbpress_copy_from]').val();
+	var siteTo = jQuery('select[name=bbpress_copy_to]').val();
+
+
+	var data = {
+		'action': 'bbpress_copy_ajax_handler',
+		'bbpc_action': $action+'_settings',
+		'bbpc_from': siteFrom,
+		'bbpc_to': siteTo
+	};
+
+	jQuery.post(ajaxurl, data, function(response) {
+		var obj = jQuery.parseJSON(response);
+		if(obj.error){alert(obj.error);}
+		else{
+			bbpc_progress('#bbpc_settings',100,100);
+			jQuery('#bbpc_settings').val(100);
+			return bbpc_run_next('bbpc_settings',$action);
+		}
+	});
+}
+
+function bbpc_forum_structure($action,$offset,$total){
+
+	var run = jQuery('#bbpc_forum_structure_set').is(":checked");
+	if(!run){
+		return bbpc_run_next('bbpc_forum_structure',$action);
+	}
+
+	var siteFrom = jQuery('select[name=bbpress_copy_from]').val();
+	var siteTo = jQuery('select[name=bbpress_copy_to]').val();
+
+	if(!$offset){$offset = 0;}
+
+	var data = {
+		'action': 'bbpress_copy_ajax_handler',
+		'bbpc_action': $action+'_forum_structure',
+		'bbpc_from': siteFrom,
+		'bbpc_to': siteTo,
+		'bbpc_offset': $offset,
+		'bbpc_total': $total
+	};
+
+	jQuery.post(ajaxurl, data, function(response) {
+		var obj = jQuery.parseJSON(response);
+		if(obj.error){alert(obj.error);}
+		else{
+
+			bbpc_progress('#bbpc_forum_structure',obj.offset,obj.total);
+			console.log(obj);
+			if(obj.offset < obj.total){
+				bbpc_forum_structure($action,obj.offset,obj.total);
+			}else{
+				return bbpc_run_next('bbpc_forum_structure',$action);
+			}
+
+		}
+	});
+}
+
+
+function bbpc_forum_topics($action,$offset,$total){
+
+	var run = jQuery('#bbpc_forum_topics_set').is(":checked");
+	if(!run){
+		return bbpc_run_next('bbpc_forum_topics',$action);
+	}
+
+	var siteFrom = jQuery('select[name=bbpress_copy_from]').val();
+	var siteTo = jQuery('select[name=bbpress_copy_to]').val();
+
+	if(!$offset){$offset = 0;}
+
+	var data = {
+		'action': 'bbpress_copy_ajax_handler',
+		'bbpc_action': $action+'_forum_topics',
+		'bbpc_from': siteFrom,
+		'bbpc_to': siteTo,
+		'bbpc_offset': $offset,
+		'bbpc_total': $total
+	};
+
+	jQuery.post(ajaxurl, data, function(response) {
+		var obj = jQuery.parseJSON(response);
+		if(obj.error){alert(obj.error);}
+		else{
+
+			bbpc_progress('#bbpc_forum_topics',obj.offset,obj.total);
+
+			console.log(obj);
+			if(obj.offset < obj.total){
+				bbpc_forum_topics($action,obj.offset,obj.total);
+			}else{
+				return bbpc_run_next('bbpc_forum_topics',$action);
+			}
+
+		}
+	});
+}
+
+function bbpc_forum_replies($action,$offset,$total){
+
+	var run = jQuery('#bbpc_forum_replies_set').is(":checked");
+	if(!run){
+		return bbpc_run_next('bbpc_forum_replies',$action);
+	}
+
+	var siteFrom = jQuery('select[name=bbpress_copy_from]').val();
+	var siteTo = jQuery('select[name=bbpress_copy_to]').val();
+
+	if(!$offset){$offset = 0;}
+
+	var data = {
+		'action': 'bbpress_copy_ajax_handler',
+		'bbpc_action': $action+'_forum_replies',
+		'bbpc_from': siteFrom,
+		'bbpc_to': siteTo,
+		'bbpc_offset': $offset,
+		'bbpc_total': $total
+	};
+
+	jQuery.post(ajaxurl, data, function(response) {
+		var obj = jQuery.parseJSON(response);
+		if(obj.error){alert(obj.error);}
+		else{
+
+			bbpc_progress('#bbpc_forum_replies',obj.offset,obj.total);
+
+			console.log(obj);
+			if(obj.offset < obj.total){
+				bbpc_forum_replies($action,obj.offset,obj.total);
+			}else{
+				return bbpc_run_next('bbpc_forum_replies',$action);
+			}
+
+		}
+	});
+}
+
+function bbpc_forum_terms($action,$offset,$total){
+
+	var run = jQuery('#bbpc_forum_terms_set').is(":checked");
+	if(!run){
+		return bbpc_run_next('bbpc_forum_terms',$action);
+	}
+
+	var siteFrom = jQuery('select[name=bbpress_copy_from]').val();
+	var siteTo = jQuery('select[name=bbpress_copy_to]').val();
+
+	if(!$offset){$offset = 0;}
+
+	var data = {
+		'action': 'bbpress_copy_ajax_handler',
+		'bbpc_action': $action+'_forum_terms',
+		'bbpc_from': siteFrom,
+		'bbpc_to': siteTo,
+		'bbpc_offset': $offset,
+		'bbpc_total': $total
+	};
+
+	jQuery.post(ajaxurl, data, function(response) {
+		var obj = jQuery.parseJSON(response);
+		if(obj.error){alert(obj.error);}
+		else{
+
+			bbpc_progress('#bbpc_forum_terms',obj.offset,obj.total);
+			console.log(obj);
+			if(obj.offset < obj.total){
+				bbpc_forum_terms($action,obj.offset,obj.total);
+			}else{
+				return bbpc_run_next('bbpc_forum_terms',$action);
+			}
+
+		}
+	});
+}
+
+function bbpc_forum_term_relationships($action,$offset,$total){
+
+	var run = jQuery('#bbpc_forum_term_relationships_set').is(":checked");
+	if(!run){
+		return bbpc_run_next('bbpc_forum_term_relationships',$action);
+	}
+
+	var siteFrom = jQuery('select[name=bbpress_copy_from]').val();
+	var siteTo = jQuery('select[name=bbpress_copy_to]').val();
+
+	if(!$offset){$offset = 0;}
+
+	var data = {
+		'action': 'bbpress_copy_ajax_handler',
+		'bbpc_action': $action+'_forum_term_relationships',
+		'bbpc_from': siteFrom,
+		'bbpc_to': siteTo,
+		'bbpc_offset': $offset,
+		'bbpc_total': $total
+	};
+
+	jQuery.post(ajaxurl, data, function(response) {
+		var obj = jQuery.parseJSON(response);
+		if(obj.error){alert(obj.error);}
+		else{
+
+			bbpc_progress('#bbpc_forum_term_relationships',obj.offset,obj.total);
+			console.log(obj);
+			if(obj.offset < obj.total){
+				bbpc_forum_term_relationships($action,obj.offset,obj.total);
+			}else{
+				return bbpc_run_next('bbpc_forum_term_relationships',$action);
+			}
+
+		}
+	});
+}
+
+function bbpc_forum_user_subscriptions($action,$offset,$total){
+
+	var run = jQuery('#bbpc_forum_user_subscriptions_set').is(":checked");
+	if(!run){
+		return bbpc_run_next('bbpc_forum_user_subscriptions',$action);
+	}
+
+	var siteFrom = jQuery('select[name=bbpress_copy_from]').val();
+	var siteTo = jQuery('select[name=bbpress_copy_to]').val();
+
+	if(!$offset){$offset = 0;}
+
+	var data = {
+		'action': 'bbpress_copy_ajax_handler',
+		'bbpc_action': $action+'_forum_user_subscriptions',
+		'bbpc_from': siteFrom,
+		'bbpc_to': siteTo,
+		'bbpc_offset': $offset,
+		'bbpc_total': $total
+	};
+
+	jQuery.post(ajaxurl, data, function(response) {
+		var obj = jQuery.parseJSON(response);
+		if(obj.error){alert(obj.error);}
+		else{
+
+			bbpc_progress('#bbpc_forum_user_subscriptions',obj.offset,obj.total);
+
+			console.log(obj);
+			if(obj.offset < obj.total){
+				bbpc_forum_user_subscriptions($action,obj.offset,obj.total);
+			}else{
+				return bbpc_run_next('bbpc_forum_user_subscriptions',$action);
+			}
+
+		}
+	});
+}
+
+function bbpc_forum_user_capabilities($action,$offset,$total){
+
+	var run = jQuery('#bbpc_forum_user_capabilities_set').is(":checked");
+	if(!run){
+		return bbpc_run_next('bbpc_forum_user_capabilities',$action);
+	}
+
+	var siteFrom = jQuery('select[name=bbpress_copy_from]').val();
+	var siteTo = jQuery('select[name=bbpress_copy_to]').val();
+
+	if(!$offset){$offset = 0;}
+
+	var data = {
+		'action': 'bbpress_copy_ajax_handler',
+		'bbpc_action': $action+'_forum_user_capabilities',
+		'bbpc_from': siteFrom,
+		'bbpc_to': siteTo,
+		'bbpc_offset': $offset,
+		'bbpc_total': $total
+	};
+
+	jQuery.post(ajaxurl, data, function(response) {
+		var obj = jQuery.parseJSON(response);
+		if(obj.error){alert(obj.error);}
+		else{
+
+			bbpc_progress('#bbpc_forum_user_capabilities',obj.offset,obj.total);
+
+			console.log(obj);
+			if(obj.offset < obj.total){
+				bbpc_forum_user_capabilities($action,obj.offset,obj.total);
+			}else{
+				return bbpc_run_next('bbpc_forum_user_capabilities',$action);
+			}
+
+		}
+	});
+}
+
+function bbpc_forum_user_levels($action,$offset,$total){
+
+	var run = jQuery('#bbpc_forum_user_levels_set').is(":checked");
+	if(!run){
+		return bbpc_run_next('bbpc_forum_user_levels',$action);
+	}
+
+	var siteFrom = jQuery('select[name=bbpress_copy_from]').val();
+	var siteTo = jQuery('select[name=bbpress_copy_to]').val();
+
+	if(!$offset){$offset = 0;}
+
+	var data = {
+		'action': 'bbpress_copy_ajax_handler',
+		'bbpc_action': $action+'_forum_user_levels',
+		'bbpc_from': siteFrom,
+		'bbpc_to': siteTo,
+		'bbpc_offset': $offset,
+		'bbpc_total': $total
+	};
+
+	jQuery.post(ajaxurl, data, function(response) {
+		var obj = jQuery.parseJSON(response);
+		if(obj.error){alert(obj.error);}
+		else{
+
+			bbpc_progress('#bbpc_forum_user_levels',obj.offset,obj.total);
+
+			console.log(obj);
+			if(obj.offset < obj.total){
+				bbpc_forum_user_levels($action,obj.offset,obj.total);
+			}else{
+				return bbpc_run_next('bbpc_forum_user_levels',$action);
+			}
+
+		}
+	});
+}
+
+function bbpc_forum_attachments($action,$offset,$total){
+
+	var run = jQuery('#bbpc_forum_attachments_set').is(":checked");
+	if(!run){
+		return bbpc_run_next('bbpc_forum_attachments',$action);
+	}
+
+	var siteFrom = jQuery('select[name=bbpress_copy_from]').val();
+	var siteTo = jQuery('select[name=bbpress_copy_to]').val();
+
+	if(!$offset){$offset = 0;}
+
+	var data = {
+		'action': 'bbpress_copy_ajax_handler',
+		'bbpc_action': $action+'_forum_attachments',
+		'bbpc_from': siteFrom,
+		'bbpc_to': siteTo,
+		'bbpc_offset': $offset,
+		'bbpc_total': $total
+	};
+
+	jQuery.post(ajaxurl, data, function(response) {
+		var obj = jQuery.parseJSON(response);
+		if(obj.error){alert(obj.error);}
+		else{
+
+			bbpc_progress('#bbpc_forum_attachments',obj.offset,obj.total);
+			console.log(obj);
+			if(obj.offset < obj.total){
+				bbpc_forum_attachments($action,obj.offset,obj.total);
+			}else{
+				return bbpc_run_next('bbpc_forum_attachments',$action);
+			}
+
+		}
+	});
+}
+
+function bbpc_progress(id,done,total){
+	jQuery(id).attr('max',total);
+	jQuery(id).val(done);
+	if(done < total){
+		jQuery(id+'_progress').html(done+' / '+total);
+	}else{
+		jQuery(id+'_progress').html('Done!');
+	}
+}
