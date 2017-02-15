@@ -15,7 +15,7 @@
  * @wordpress-plugin
  * Plugin Name:       bbPress Multisite Move
  * Plugin URI:        http://ayecode.io/
- * Description:       This is a short description of what the plugin does. It's displayed in the WordPress admin area.
+ * Description:       NETWORK ACTIVATE THIS PLUGIN: This pluign is used to move bbPress installs from one multisite ot another.
  * Version:           1.0.0
  * Author:            Stiofan O'Connor
  * Author URI:        http://ayecode.io/

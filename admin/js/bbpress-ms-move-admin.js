@@ -1,3 +1,4 @@
+var bbpcNonce = '';
 (function( $ ) {
 	'use strict';
 
@@ -29,9 +30,11 @@
 	 * practising this, we should strive to set a better example in our own work.
 	 */
 var bbpc_run = false;
+
 	$( window ).load(function() {
 		jQuery('#bbpress_copy').click(function() {
 
+			bbpcNonce = jQuery('#bbpc-nonce').val();
 			if(bbpc_run){alert('Already run, please refresh the page.'); return;}
 
 			var siteFrom = jQuery('select[name=bbpress_copy_from]').val();
@@ -45,10 +48,10 @@ var bbpc_run = false;
 			jQuery('.bbpc-checkbox').attr("disabled", true);
 
 			bbpc_run = true;
-			//bbpc_forum_settings('copy');
 
 			var first_function = jQuery('#bbpc-functions').find( "li" ).first().data("function");
 			window[first_function]('copy');
+			bbpc_enableBeforeUnload();
 
 		});
 
@@ -61,6 +64,7 @@ var bbpc_run = false;
 
 				var first_function = jQuery('#bbpc-functions').find( "li" ).first().data("function");
 				window[first_function]('delete');
+				bbpc_enableBeforeUnload();
 			}
 			else
 			{
@@ -75,13 +79,15 @@ var bbpc_run = false;
 })( jQuery );
 
 
+
 function bbpc_run_next($last,$action){
 	var next = jQuery("ul#bbpc-functions").find("[data-function='" + $last + "']").next();
 	console.log('###'+next.data("function"));
 	if(next.data("function")){
 		window[next.data("function")]($action);
 	}else{
-		alert('Fin');
+		alert('Done!');
+		bbpc_disableBeforeUnload();
 	}
 }
 
@@ -89,7 +95,7 @@ function bbpc_run_next($last,$action){
 // bbPress Copy functions
 
 function bbpc_settings($action){
-
+	
 	var run = jQuery('#bbpc_settings_set').is(":checked");
 	if(!run){
 		return bbpc_run_next('bbpc_settings',$action);
@@ -100,6 +106,7 @@ function bbpc_settings($action){
 
 
 	var data = {
+		'security': bbpcNonce,
 		'action': 'bbpress_copy_ajax_handler',
 		'bbpc_action': $action+'_settings',
 		'bbpc_from': siteFrom,
@@ -130,6 +137,7 @@ function bbpc_forum_structure($action,$offset,$total){
 	if(!$offset){$offset = 0;}
 
 	var data = {
+		'security': bbpcNonce,
 		'action': 'bbpress_copy_ajax_handler',
 		'bbpc_action': $action+'_forum_structure',
 		'bbpc_from': siteFrom,
@@ -169,6 +177,7 @@ function bbpc_forum_topics($action,$offset,$total){
 	if(!$offset){$offset = 0;}
 
 	var data = {
+		'security': bbpcNonce,
 		'action': 'bbpress_copy_ajax_handler',
 		'bbpc_action': $action+'_forum_topics',
 		'bbpc_from': siteFrom,
@@ -208,6 +217,7 @@ function bbpc_forum_replies($action,$offset,$total){
 	if(!$offset){$offset = 0;}
 
 	var data = {
+		'security': bbpcNonce,
 		'action': 'bbpress_copy_ajax_handler',
 		'bbpc_action': $action+'_forum_replies',
 		'bbpc_from': siteFrom,
@@ -247,6 +257,7 @@ function bbpc_forum_terms($action,$offset,$total){
 	if(!$offset){$offset = 0;}
 
 	var data = {
+		'security': bbpcNonce,
 		'action': 'bbpress_copy_ajax_handler',
 		'bbpc_action': $action+'_forum_terms',
 		'bbpc_from': siteFrom,
@@ -285,6 +296,7 @@ function bbpc_forum_term_relationships($action,$offset,$total){
 	if(!$offset){$offset = 0;}
 
 	var data = {
+		'security': bbpcNonce,
 		'action': 'bbpress_copy_ajax_handler',
 		'bbpc_action': $action+'_forum_term_relationships',
 		'bbpc_from': siteFrom,
@@ -323,6 +335,7 @@ function bbpc_forum_user_subscriptions($action,$offset,$total){
 	if(!$offset){$offset = 0;}
 
 	var data = {
+		'security': bbpcNonce,
 		'action': 'bbpress_copy_ajax_handler',
 		'bbpc_action': $action+'_forum_user_subscriptions',
 		'bbpc_from': siteFrom,
@@ -362,6 +375,7 @@ function bbpc_forum_user_capabilities($action,$offset,$total){
 	if(!$offset){$offset = 0;}
 
 	var data = {
+		'security': bbpcNonce,
 		'action': 'bbpress_copy_ajax_handler',
 		'bbpc_action': $action+'_forum_user_capabilities',
 		'bbpc_from': siteFrom,
@@ -401,6 +415,7 @@ function bbpc_forum_user_levels($action,$offset,$total){
 	if(!$offset){$offset = 0;}
 
 	var data = {
+		'security': bbpcNonce,
 		'action': 'bbpress_copy_ajax_handler',
 		'bbpc_action': $action+'_forum_user_levels',
 		'bbpc_from': siteFrom,
@@ -440,6 +455,7 @@ function bbpc_forum_attachments($action,$offset,$total){
 	if(!$offset){$offset = 0;}
 
 	var data = {
+		'security': bbpcNonce,
 		'action': 'bbpress_copy_ajax_handler',
 		'bbpc_action': $action+'_forum_attachments',
 		'bbpc_from': siteFrom,
@@ -473,4 +489,31 @@ function bbpc_progress(id,done,total){
 	}else{
 		jQuery(id+'_progress').html('Done!');
 	}
+}
+
+
+
+function bbpc_enableBeforeUnload() {
+	var bbpc_confirmOnPageExit = function (e)
+	{
+		// If we haven't been passed the event get the window.event
+		e = e || window.event;
+
+		var message = 'You will have to start again if you navigate away now?';
+
+		// For IE6-8 and Firefox prior to version 4
+		if (e)
+		{
+			e.returnValue = message;
+		}
+
+		// For Chrome, Safari, IE8+ and Opera 12+
+		return message;
+	};
+
+	window.onbeforeunload = bbpc_confirmOnPageExit;
+
+}
+function bbpc_disableBeforeUnload() {
+	window.onbeforeunload = null;
 }

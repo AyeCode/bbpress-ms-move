@@ -35,12 +35,9 @@ class Bbpress_Ms_Move_Copy {
 
 	public static function blogs_dropdown( $name = 'existing_blog' ) {
 		global $wpdb;
-		//$query = $wpdb->prepare("SELECT blog_id, domain, path FROM $wpdb->blogs WHERE site_id = %d AND public = '1' AND blog_id <> %d ORDER BY registered DESC LIMIT 0, 100", $wpdb->siteid, $wpdb->siteid);
-		//$query = $wpdb->prepare("SELECT blog_id, domain, path FROM $wpdb->blogs WHERE site_id = %d AND public = '1'  ORDER BY registered DESC LIMIT 0, 100", $wpdb->siteid);
 		$query = $wpdb->prepare("SELECT blog_id, domain, path FROM $wpdb->blogs WHERE site_id = %d  ORDER BY registered DESC LIMIT 0, 100", $wpdb->siteid);
 		$blogs = $wpdb->get_results( $query, ARRAY_A );
 
-		//print_r($blogs);
 		$dropdown = '';
 
 		foreach ( $blogs as $blog ) {
@@ -56,8 +53,10 @@ class Bbpress_Ms_Move_Copy {
 	public function ajax_handler(){
 		global $wpdb;
 
-//		print_r($_POST);
-//		echo '###popo###';
+		// security checks
+		if( !current_user_can('administrator') ){wp_die();}
+		check_ajax_referer( 'bbpc-ajax-security', 'security' );
+
 		if(isset($_POST['bbpc_action']) && $_POST['bbpc_action']){
 			$bbpc_action = esc_attr($_POST['bbpc_action']);
 
@@ -246,7 +245,7 @@ class Bbpress_Ms_Move_Copy {
 					$bbpc_total = $this->total_post_attachments($bbpc_from,$cpt );
 
 				}else{
-					$count = $this->delete_post_attachments($bbpc_from,$limit,$bbpc_offset,$cpt );
+					$count = $this->delete_post_attachments($bbpc_from,$limit,0,$cpt );
 					$bbpc_offset = $bbpc_offset+$count;
 				}
 
@@ -262,24 +261,7 @@ class Bbpress_Ms_Move_Copy {
 				if(!$bbpc_total){
 					$bbpc_total = $this->total_posts($bbpc_from,$cpt);
 				}else{
-					$count = $this->remove_posts($bbpc_from,$limit,$bbpc_offset,$cpt);
-					$bbpc_offset = $bbpc_offset+$count;
-				}
-
-				echo json_encode(array(
-					'success'=>'1',
-					'total'=> $bbpc_total,
-					'offset'=> $bbpc_offset
-				));
-			}elseif($bbpc_action=='delete_forum_structure'){
-
-				$cpt = 'forum';
-
-				if(!$bbpc_total){
-					$bbpc_total = $this->total_posts($bbpc_from,$cpt);
-
-				}else{
-					$count = $this->remove_posts($bbpc_from,$limit,$bbpc_offset,$cpt);
+					$count = $this->remove_posts($bbpc_from,$limit,0,$cpt);
 					$bbpc_offset = $bbpc_offset+$count;
 				}
 
@@ -296,7 +278,7 @@ class Bbpress_Ms_Move_Copy {
 					$bbpc_total = $this->total_posts($bbpc_from,$cpt );
 
 				}else{
-					$count = $this->remove_posts($bbpc_from,$limit,$bbpc_offset,$cpt );
+					$count = $this->remove_posts($bbpc_from,$limit,0,$cpt );
 					$bbpc_offset = $bbpc_offset+$count;
 				}
 
@@ -313,7 +295,7 @@ class Bbpress_Ms_Move_Copy {
 					$bbpc_total = $this->total_posts($bbpc_from,$cpt );
 
 				}else{
-					$count = $this->remove_posts($bbpc_from,$limit,$bbpc_offset,$cpt );
+					$count = $this->remove_posts($bbpc_from,$limit,0,$cpt );
 					$bbpc_offset = $bbpc_offset+$count;
 				}
 
@@ -330,7 +312,7 @@ class Bbpress_Ms_Move_Copy {
 					$bbpc_total = $this->total_term_relationships($bbpc_from,$tax);
 
 				}else{
-					$count = $this->remove_term_relationships($bbpc_from,$limit,$bbpc_offset,$tax );
+					$count = $this->remove_term_relationships($bbpc_from,$limit,0,$tax );
 					$bbpc_offset = $bbpc_offset+$count;
 				}
 
@@ -347,7 +329,7 @@ class Bbpress_Ms_Move_Copy {
 					$bbpc_total = $this->total_terms($bbpc_from,$tax);
 
 				}else{
-					$count = $this->remove_terms($bbpc_from,$limit,$bbpc_offset,$tax );
+					$count = $this->remove_terms($bbpc_from,$limit,0,$tax );
 					$bbpc_offset = $bbpc_offset+$count;
 				}
 
@@ -364,7 +346,7 @@ class Bbpress_Ms_Move_Copy {
 					$bbpc_total = $this->total_user_metas($bbpc_from,$meta_key);
 
 				}else{
-					$count = $this->remove_user_metas($bbpc_from,$limit,$bbpc_offset,$meta_key );
+					$count = $this->remove_user_metas($bbpc_from,$limit,0,$meta_key );
 					$bbpc_offset = $bbpc_offset+$count;
 				}
 
@@ -393,6 +375,8 @@ class Bbpress_Ms_Move_Copy {
 			)
 		);
 
+
+
 		restore_current_blog();
 
 		if(!empty($posts)){
@@ -410,9 +394,11 @@ class Bbpress_Ms_Move_Copy {
 
 		switch_to_blog( $bbpc_from );
 		$meta = get_post_custom( $post->ID );
+
 		if(!isset($post->post_type)){
 			$post = get_post($post->ID);
 		}
+
 		$from_upload_dir = wp_upload_dir();
 		restore_current_blog();
 
@@ -433,11 +419,12 @@ class Bbpress_Ms_Move_Copy {
 		$this->migrate_meta( $post->import_id, $meta );
 
 		// copy attachment file over
-		if(isset($meta['_wp_attached_file'][0]) && $meta['_wp_attachment_metadata'][0]){
+		if( isset($meta['_wp_attached_file'][0]) ){
 			$to_upload_dir = wp_upload_dir();
 
 
 			$a_meta = maybe_unserialize($meta['_wp_attachment_metadata'][0]);
+
 
 
 			if(!copy(trailingslashit($from_upload_dir['basedir']).$meta['_wp_attached_file'][0] , trailingslashit($to_upload_dir['basedir']).$meta['_wp_attached_file'][0] )){
@@ -1104,9 +1091,9 @@ class Bbpress_Ms_Move_Copy {
 		return apply_filters( 'bbpc_delete_actions', array(
 			"bbpc_settings" => 0,
 			"bbpc_forum_attachments" => 0,
-			"bbpc_forum_structure" => 1,
-			"bbpc_forum_topics" => 1,
 			"bbpc_forum_replies" => 1,
+			"bbpc_forum_topics" => 1,
+			"bbpc_forum_structure" => 1,
 			"bbpc_forum_term_relationships" => 1,
 			"bbpc_forum_terms" => 1,
 			"bbpc_forum_user_subscriptions" => 1,

@@ -21,15 +21,17 @@
 	<h2><?php _e( 'bbPress Multisite Move', 'bbpress-ms-move' ); ?></h2>
 	<?php settings_errors(); ?>
 
-	<?php if( isset( $_GET[ 'tab' ] ) ) {
+	<?php
+	$active_tab = 'bbpress_copy';
+
+	if( isset( $_GET[ 'tab' ] ) ) {
 		$active_tab = $_GET[ 'tab' ];
 	} else if( $active_tab == 'bbpress_delete' ) {
 		$active_tab = 'bbpress_delete';
 	} else if( $active_tab == 'input_examples' ) {
 		$active_tab = 'input_examples';
-	} else {
-		$active_tab = 'bbpress_copy';
-	} // end if/else ?>
+	}
+	?>
 
 	<h2 class="nav-tab-wrapper">
 		<a href="?page=bbpress-ms-move" class="nav-tab <?php echo $active_tab == 'bbpress_copy' ? 'nav-tab-active' : ''; ?>"><?php _e( 'bbPress Copy', 'bbpress-ms-move' ); ?></a>
@@ -37,7 +39,11 @@
 	</h2>
 
 	<form method="post" action="options.php">
+
 		<?php
+		//Set Nonce
+		$ajax_nonce = wp_create_nonce( "bbpc-ajax-security" );
+		echo "<input id='bbpc-nonce' type='hidden' value='$ajax_nonce' />";
 
 		if( $active_tab == 'bbpress_copy' ) {
 
