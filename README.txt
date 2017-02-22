@@ -1,4 +1,4 @@
-=== Plugin Name ===
+=== Move bbPress Multisite ===
 Contributors: stiofansisland, paoltaia, ayecode
 Donate link: https://wpgeodirectory.com/
 Tags: bbPress
