@@ -106,11 +106,14 @@ class Bbpress_Ms_Move_Admin {
 	 * @since 1.0.0
 	 */
 	public function add_admin_menu(){
-		//add_menu_page( "page_title", "menu_title", 'manage_network_plugins', 'menu_slug', 'add_network_menu_1234_cb');
 		add_menu_page( $this->plugin_name, 'bbPress Move', 'manage_network_plugins', $this->plugin_name, array(&$this, 'admin_page_html') );
-		
 	}
 
+	/**
+	 * The admin page html content
+	 *
+	 * @since 1.0.0
+	 */
 	public function admin_page_html(){
 		/**
 		 * The admin page html file.

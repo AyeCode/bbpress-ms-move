@@ -66,10 +66,7 @@ var bbpc_run = false;
 				window[first_function]('delete');
 				bbpc_enableBeforeUnload();
 			}
-			else
-			{
-				return;
-			}
+			
 		});
 
 	});
